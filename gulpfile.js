@@ -25,7 +25,7 @@ const paths = {
   },
   scripts: {
     src: "src/scripts/**/*.js",
-    dest: "assets/scripts/"
+    dest: "assets/"
   },
   images: {
     src: "src/images/**/*.{png,PNG,jpeg,jpg,svg,gif}",
@@ -33,7 +33,7 @@ const paths = {
   },
   ejs: {
     src: "src/views/**/*.ejs",
-    dest: "assets/pages/"
+    dest: "assets/"
   }
 };
 
@@ -46,7 +46,7 @@ function createErrorHandler(name) {
 
 //Clean up old files that are to be rebuilt:
 function clean() {
-  return del([ 'assets' ]);
+  return del([ 'assets/partials', 'assets/stylesheets', 'assets/*.html', 'assets/*.js' ]);
 }
 
 //EJS file combine and convert to HTML:
@@ -69,7 +69,7 @@ function scripts() {
     .on("error", createErrorHandler("babel"))
     .pipe(uglify())
     .on("error", createErrorHandler("uglify"))
-    .pipe(concat("main.min.js")) //name the concat file here
+    .pipe(concat("app.js")) //name the concat file here
     .on("error", createErrorHandler("concat"))
     .pipe(gulp.dest(paths.scripts.dest))
     .on("error", createErrorHandler("gulp.dest"));
@@ -116,13 +116,18 @@ function serve() {
       baseDir: 'assets'
     }
   });
+  gulp.watch(paths.ejs.src, async function watcherEjs (){
+    await serveEjs;
+    reload();
+    return;
+  })
 }
 
 //Watch certain files for changes and other stuff:
 function watch() {
-  gulp.watch(['*.html', paths.styles.src, paths.scripts.src], {cwd: 'src'}, reload);
-  // gulp.watch(paths.scripts.src, scripts);
-  // gulp.watch(paths.styles.src, styles);
+  gulp.watch(paths.ejs.src, serveEjs);
+  gulp.watch(paths.scripts.src, scripts);
+  gulp.watch(paths.styles.src, styles);
 }
 
 exports.clean = clean;
@@ -133,7 +138,7 @@ exports.styles = styles;
 exports.scripts = scripts;
 exports.watch = watch;
 
-var build = gulp.series(clean, gulp.parallel(styles, scripts));
+var build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve, watch));
 
 gulp.task('build', build);
 gulp.task('default', build);
