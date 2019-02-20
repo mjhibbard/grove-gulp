@@ -20,19 +20,19 @@ const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 // Paths for tasks:
 const paths = {
   styles: {
-    src: "src/stylesheets/**/*.css",
+    src: "../../theGrove2.0/public/stylesheets/**/*.css",
     dest: "assets/stylesheets/"
   },
   scripts: {
-    src: "src/scripts/**/*.js",
+    src: "../../theGrove2.0/public/**/*.js",
     dest: "assets/"
   },
   images: {
-    src: "src/images/**/*.{png,PNG,jpeg,jpg,svg,gif}",
+    src: "../../theGrove2.0/public/images/**/*.{png,PNG,jpeg,jpg,svg,gif}",
     dest: "assets/images/"
   },
   ejs: {
-    src: "src/views/**/*.ejs",
+    src: "../../theGrove2.0/views/**/*.ejs",
     dest: "assets/"
   }
 };
@@ -47,6 +47,9 @@ function createErrorHandler(name) {
 //Clean up old files that are to be rebuilt:
 function clean() {
   return del([ 'assets/partials', 'assets/stylesheets', 'assets/*.html', 'assets/*.js' ]);
+}
+function cleanImages() {
+  return del(['assets/images']);
 }
 
 //EJS file combine and convert to HTML:
@@ -116,11 +119,22 @@ function serve() {
       baseDir: 'assets'
     }
   });
-  gulp.watch(paths.ejs.src, async function watcherEjs (){
-    await serveEjs;
-    reload();
-    return;
-  })
+  gulp
+    .watch(paths.ejs.src, async function watcherEjs (){
+      await serveEjs();
+      reload();
+      return;
+    });
+  gulp.watch(paths.styles.src, async function watcherStyles (){
+      await styles();
+      reload();
+      return;
+    });
+  gulp.watch(paths.scripts.src, async function watcherScripts (){
+      await scripts();
+      reload();
+      return;
+    });
 }
 
 //Watch certain files for changes and other stuff:
@@ -131,6 +145,7 @@ function watch() {
 }
 
 exports.clean = clean;
+exports.cleanImages = cleanImages;
 exports.serveEjs = serveEjs;
 exports.serve = serve;
 exports.images = images;
@@ -138,7 +153,7 @@ exports.styles = styles;
 exports.scripts = scripts;
 exports.watch = watch;
 
-var build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve, watch));
+var build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve));
 
 gulp.task('build', build);
 gulp.task('default', build);
