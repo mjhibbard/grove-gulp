@@ -51,6 +51,9 @@ function clean() {
 function cleanImages() {
   return del(['assets/images']);
 }
+function cleanAll() {
+  return del(['assets']);
+}
 
 //EJS file combine and convert to HTML:
 function serveEjs() {
@@ -146,6 +149,7 @@ function watch() {
 
 exports.clean = clean;
 exports.cleanImages = cleanImages;
+exports.cleanAll = cleanAll;
 exports.serveEjs = serveEjs;
 exports.serve = serve;
 exports.images = images;
@@ -153,7 +157,8 @@ exports.styles = styles;
 exports.scripts = scripts;
 exports.watch = watch;
 
-var build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve));
+const build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve));
+const buildMore = gulp.series(clean, images, gulp.parallel(styles, scripts, serveEjs, serve));
 
-gulp.task('build', build);
+gulp.task('build', buildMore);
 gulp.task('default', build);
