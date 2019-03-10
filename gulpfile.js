@@ -20,19 +20,19 @@ const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 // Paths for tasks:
 const paths = {
   styles: {
-    src: "../../theGrove2.0/public/stylesheets/**/*.css",
+    src: "../../theGrove2/theGrove2.0/public/stylesheets/**/*.css",
     dest: "assets/stylesheets/"
   },
   scripts: {
-    src: "../../theGrove2.0/public/**/*.js",
+    src: "../../theGrove2/theGrove2.0/public/**/*.js",
     dest: "assets/"
   },
   images: {
-    src: "../../theGrove2.0/public/images/**/*.{png,PNG,jpeg,jpg,svg,gif}",
+    src: "../../theGrove2/theGrove2.0/public/images/**/*.{png,PNG,jpeg,jpg,svg,gif}",
     dest: "assets/images/"
   },
   ejs: {
-    src: "../../theGrove2.0/views/**/*.ejs",
+    src: "../../theGrove2/theGrove2.0/views/**/*.ejs",
     dest: "assets/"
   }
 };
@@ -50,6 +50,9 @@ function clean() {
 }
 function cleanImages() {
   return del(['assets/images']);
+}
+function cleanAll() {
+  return del(['assets']);
 }
 
 //EJS file combine and convert to HTML:
@@ -146,6 +149,7 @@ function watch() {
 
 exports.clean = clean;
 exports.cleanImages = cleanImages;
+exports.cleanAll = cleanAll;
 exports.serveEjs = serveEjs;
 exports.serve = serve;
 exports.images = images;
@@ -153,7 +157,8 @@ exports.styles = styles;
 exports.scripts = scripts;
 exports.watch = watch;
 
-var build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve));
+const build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve));
+const buildMore = gulp.series(clean, images, gulp.parallel(styles, scripts, serveEjs, serve));
 
-gulp.task('build', build);
+gulp.task('build', buildMore);
 gulp.task('default', build);
