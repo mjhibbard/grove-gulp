@@ -5,7 +5,8 @@ const uglify = require("gulp-uglify");
 const rename = require("gulp-rename");
 const cleanCSS = require("gulp-clean-css");
 const del = require("del");
-const pump = require("pump");
+const source = require("gulp-sourcemaps");
+//const pump = require("pump");
 const ejs = require("gulp-ejs");
 
 // BrowserSync with "live reload" feature:
@@ -37,7 +38,7 @@ const paths = {
   }
 };
 
-//Handle errors with the use of 'pump':
+//Handle errors (with the use of 'pump' later):
 function createErrorHandler(name) {
   return function(err) {
     console.error("Error from " + name + " in gulp task", err.toString());
@@ -85,6 +86,7 @@ function scripts() {
 function styles() {
   return gulp
     .src(paths.styles.src, { sourcemaps: true })
+    .pipe(source.init())
     .pipe(cleanCSS())
     .pipe(
       rename({
@@ -92,6 +94,7 @@ function styles() {
         // suffix: ".min"
       })
     )
+    .pipe(source.write())
     .pipe(gulp.dest(paths.styles.dest));
 }
 
