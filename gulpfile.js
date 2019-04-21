@@ -7,6 +7,11 @@ const cleanCSS = require("gulp-clean-css");
 const del = require("del");
 const pump = require("pump");
 const ejs = require("gulp-ejs");
+const source = require("gulp-sourcemaps");
+
+// Sass config and compiler
+const sass = require("gulp-sass");
+sass.compiler = require("node-sass");
 
 // BrowserSync with "live reload" feature:
 const browserSync = require('browser-sync');
@@ -21,6 +26,10 @@ const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 const paths = {
   styles: {
     src: "../../theGrove2/theGrove2.0/public/stylesheets/**/*.css",
+    dest: "assets/stylesheets/"
+  },
+  sassStyles: {
+    src: "../../theGrove2/theGrove2.0/public/stylesheets/**/*.scss",
     dest: "assets/stylesheets/"
   },
   scripts: {
@@ -85,14 +94,26 @@ function scripts() {
 function styles() {
   return gulp
     .src(paths.styles.src, { sourcemaps: true })
+    .pipe(source.init())
     .pipe(cleanCSS())
     .pipe(
       rename({
-        basename: "styles"
+        basename: "stylesTwo"
         // suffix: ".min"
       })
     )
+    .pipe(source.write())
     .pipe(gulp.dest(paths.styles.dest));
+}
+
+function sassStyles() {
+  return gulp
+    .src(paths.sassStyles.src)
+    .pipe(source.init())
+    .pipe(sass().on("error", sass.logError))
+    .pipe(cleanCSS())
+    .pipe(source.write())
+    .pipe(gulp.dest(paths.sassStyles.dest))
 }
 
 //Image compression (lossy and lossless):
@@ -138,6 +159,11 @@ function serve() {
       reload();
       return;
     });
+  gulp.watch(paths.sassStyles.src, async function watcherSassStyles (){
+    await sassStyles();
+    reload();
+    return;
+  });
 }
 
 //Watch certain files for changes and other stuff:
@@ -154,11 +180,12 @@ exports.serveEjs = serveEjs;
 exports.serve = serve;
 exports.images = images;
 exports.styles = styles;
+exports.sassStyles = sassStyles;
 exports.scripts = scripts;
 exports.watch = watch;
 
-const build = gulp.series(clean, gulp.parallel(styles, scripts, serveEjs, serve));
-const buildMore = gulp.series(clean, images, gulp.parallel(styles, scripts, serveEjs, serve));
+const build = gulp.series(clean, gulp.parallel(sassStyles, styles, scripts, serveEjs, serve));
+const buildMore = gulp.series(cleanAll, images, gulp.parallel(sassStyles, styles, scripts, serveEjs, serve));
 
 gulp.task('build', buildMore);
 gulp.task('default', build);
