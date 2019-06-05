@@ -98,7 +98,7 @@ function styles() {
     .pipe(cleanCSS())
     .pipe(
       rename({
-        basename: "stylesTwo"
+        basename: "main"
         // suffix: ".min"
       })
     )
