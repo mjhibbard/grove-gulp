@@ -4,6 +4,8 @@ const concat = require("gulp-concat");
 const uglify = require("gulp-uglify");
 const rename = require("gulp-rename");
 const cleanCSS = require("gulp-clean-css");
+const autoprefixer = require("autoprefixer");
+const postcss = require("gulp-postcss");
 const del = require("del");
 const source = require("gulp-sourcemaps");
 //const pump = require("pump");
@@ -98,8 +100,9 @@ function scripts() {
 //Styles compression:
 function styles() {
   return gulp
-    .src(paths.styles.src, { sourcemaps: true })
+    .src(paths.styles.src)
     .pipe(source.init())
+    .pipe(postcss([ autoprefixer() ]))
     .pipe(cleanCSS())
     .pipe(
       rename({
@@ -117,6 +120,7 @@ function sassStyles() {
     .on("error", createErrorHandler("gulp.src"))
     .pipe(source.init())
     .pipe(sass().on("error", sass.logError))
+    .pipe(postcss([ autoprefixer() ]))
     .on("error", createErrorHandler("gulp sass function"))
     .pipe(cleanCSS())
     //.pipe(rename({ basename: "stylesTwo" }))
@@ -137,12 +141,26 @@ function images() {
         imagemin.svgo(),
         imageminPngQuant(),
         imageminJpegRecompress()
-      ])
+      ], { verbose: true })
     )
     .on("error", createErrorHandler("imagemin"))
     .pipe(gulp.dest(paths.images.dest))
     .on("error", createErrorHandler("gulp.dest"));
 }
+
+//  jpegtran({
+  //progressive: boolean(false)-lossless conversion to progressive
+  //arithmetic: boolean(false)
+//  imagemin.optipng({
+  //OptimizationLevel: 0-7. Default 3
+//  imageminPngQuant({
+  //strip: boolean(false)-remove optional metadata
+  //speed: 1(brute-force)-4(default)-11(fastest & disables dithering/lowers compression level)
+//  imageminJpegRecompress(
+  //{accurate: boolean(false)- favor accuracy over speed
+  //quality: string(medium)- low, medium, high, veryhigh
+  //quality: high}
+
 
 //Serve the files to the browser for development:
 function serve() {
